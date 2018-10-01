@@ -1,0 +1,11 @@
+version: '2'
+services:
+    app:
+        container_name: "nextjs-app"
+        build: .
+        ports:
+          - "3000:80"
+    dynamodb:
+      image: amazon/dynamodb-local
+      ports:
+        - "8000:8000"
