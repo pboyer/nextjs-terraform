@@ -51,5 +51,5 @@ jobs:
               docker push "pboyer/teaser:${CIRCLE_BUILD_NUM}"
               cd terraform/stage
               ../bin/terraform/Linux/terraform init
-              ../bin/terraform/Linux/terraform apply -auto-approve -var 'teaser_docker_image=pboyer/teaser:${CIRCLE_BUILD_NUM}'
+              ../bin/terraform/Linux/terraform apply -auto-approve -var "teaser_docker_image=pboyer/teaser:${CIRCLE_BUILD_NUM}"
             fi
