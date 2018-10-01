@@ -49,8 +49,7 @@ jobs:
               echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
               docker tag app "pboyer/teaser:${CIRCLE_SHA1}"
               docker push "pboyer/teaser:${CIRCLE_SHA1}"
-              ./install_terraform.sh
-              cd terraform/stage
+              cd stage/stage
               ../bin/terraform/Linux/terraform init
               ../bin/terraform/Linux/terraform -auto-approve -var 'teaser_docker_image=pboyer/teaser:${CIRCLE_SHA1}'
             fi
