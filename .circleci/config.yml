@@ -46,6 +46,7 @@ jobs:
           name: Push application Docker image
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
               docker tag app "pboyer/teaser:${CIRCLE_SHA1}"
               docker push "pboyer/teaser:${CIRCLE_SHA1}"
               cd terraform/stage
