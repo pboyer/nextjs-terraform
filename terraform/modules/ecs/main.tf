@@ -33,8 +33,8 @@ data "template_file" "teaser_task" {
   template = "${file("${path.module}/tasks/teaser_task_definition.json")}"
 
   vars {
-    # image           = "${aws_ecr_repository.teaser_app.repository_url}"
-    log_group       = "${aws_cloudwatch_log_group.teaser.name}"
+    log_group = "${aws_cloudwatch_log_group.teaser.name}"
+    image     = "${var.teaser_docker_image}"
   }
 }
 
@@ -51,7 +51,7 @@ resource "aws_ecs_task_definition" "teaser" {
 
 /* Simply specify the family to find the latest ACTIVE revision in that family */
 data "aws_ecs_task_definition" "teaser" {
-  depends_on = [ "aws_ecs_task_definition.teaser" ]
+  depends_on      = ["aws_ecs_task_definition.teaser"]
   task_definition = "${aws_ecs_task_definition.teaser.family}"
 }
 
@@ -63,12 +63,12 @@ resource "random_id" "target_group_sufix" {
 }
 
 resource "aws_alb_target_group" "alb_target_group" {
-  name     = "${var.environment}-alb-target-group-${random_id.target_group_sufix.hex}"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = "${var.vpc_id}"
+  name        = "${var.environment}-alb-target-group-${random_id.target_group_sufix.hex}"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = "${var.vpc_id}"
   target_type = "ip"
-  depends_on = [ "aws_alb.alb_teaser", ]
+  depends_on  = ["aws_alb.alb_teaser"]
 
   lifecycle {
     create_before_destroy = true
@@ -136,10 +136,11 @@ resource "aws_alb_listener" "teaser" {
 */
 data "aws_iam_policy_document" "ecs_service_role" {
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["sts:AssumeRole"]
+
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["ecs.amazonaws.com"]
     }
   }
@@ -152,21 +153,23 @@ resource "aws_iam_role" "ecs_role" {
 
 data "aws_iam_policy_document" "ecs_service_policy" {
   statement {
-    effect = "Allow"
+    effect    = "Allow"
     resources = ["*"]
+
     actions = [
       "elasticloadbalancing:Describe*",
       "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
       "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
       "ec2:Describe*",
-      "ec2:AuthorizeSecurityGroupIngress"
+      "ec2:AuthorizeSecurityGroupIngress",
     ]
   }
 }
 
 /* ecs service scheduler role */
 resource "aws_iam_role_policy" "ecs_service_role_policy" {
-  name   = "ecs_service_role_policy"
+  name = "ecs_service_role_policy"
+
   #policy = "${file("${path.module}/policies/ecs-service-role.json")}"
   policy = "${data.aws_iam_policy_document.ecs_service_policy.json}"
   role   = "${aws_iam_role.ecs_role.id}"
@@ -177,6 +180,7 @@ resource "aws_iam_role" "ecs_execution_role" {
   name               = "ecs_task_execution_role"
   assume_role_policy = "${file("${path.module}/policies/ecs-task-execution-role.json")}"
 }
+
 resource "aws_iam_role_policy" "ecs_execution_role_policy" {
   name   = "ecs_execution_role_policy"
   policy = "${file("${path.module}/policies/ecs-execution-role-policy.json")}"
@@ -213,13 +217,12 @@ resource "aws_security_group" "ecs_service" {
   }
 }
 
-
 resource "aws_ecs_service" "teaser" {
   name            = "${var.environment}-teaser"
   task_definition = "${aws_ecs_task_definition.teaser.family}:${max("${aws_ecs_task_definition.teaser.revision}", "${data.aws_ecs_task_definition.teaser.revision}")}"
   desired_count   = 2
   launch_type     = "FARGATE"
-  cluster =       "${aws_ecs_cluster.cluster.id}"
+  cluster         = "${aws_ecs_cluster.cluster.id}"
   depends_on      = ["aws_iam_role_policy.ecs_service_role_policy"]
 
   network_configuration {
@@ -235,4 +238,3 @@ resource "aws_ecs_service" "teaser" {
 
   depends_on = ["aws_alb_target_group.alb_target_group"]
 }
-

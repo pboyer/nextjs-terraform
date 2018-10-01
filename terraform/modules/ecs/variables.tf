@@ -29,3 +29,7 @@ variable "public_subnet_ids" {
 variable "repository_name" {
   description = "The name of the repisitory"
 }
+
+variable "teaser_docker_image" {
+  description = "Teaser docker image along with tag"
+}

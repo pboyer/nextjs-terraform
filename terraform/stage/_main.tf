@@ -33,6 +33,7 @@ module "networking" {
 
 module "ecs" {
   source             = "../modules/ecs"
+  teaser_docker_image= "${var.teaser_docker_image}"
   environment        = "stage"
   vpc_id             = "${module.networking.vpc_id}"
   availability_zones = "${local.stage_availability_zones}"

@@ -1,7 +1,7 @@
 [
   {
     "name": "teaser",
-    "image": "pboyer/teaser:latest",
+    "image": "${image}",
     "portMappings": [
       {
         "containerPort": 80,
