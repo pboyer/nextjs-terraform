@@ -51,5 +51,5 @@ jobs:
               docker push "pboyer/teaser:${CIRCLE_SHA1}"
               cd terraform/stage
               ../bin/terraform/Linux/terraform init
-              ../bin/terraform/Linux/terraform -auto-approve -var 'teaser_docker_image=pboyer/teaser:${CIRCLE_SHA1}'
+              ../bin/terraform/Linux/terraform apply -auto-approve -var 'teaser_docker_image=pboyer/teaser:${CIRCLE_SHA1}'
             fi
