@@ -42,16 +42,13 @@ jobs:
       #     name: Run tests
       #     command: |
       #       docker-compose -f ./docker-compose.test.yml up
-      - push:
+      - deploy:
           name: Push application Docker image
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               docker tag app "pboyer/teaser:${CIRCLE_SHA1}"
               docker push "pboyer/teaser:${CIRCLE_SHA1}"
+              cd terraform/stage
+              terraform init
+              terraform -auto-approve -var 'teaser_docker_image=pboyer/teaser:${CIRCLE_SHA1}'
             fi
-      - deploy:
-          name: Do terraform ECS update
-          command: |
-            cd terraform/stage
-            terraform init
-            terraform -auto-approve -var 'teaser_docker_image=pboyer/teaser:${CIRCLE_SHA1}'
